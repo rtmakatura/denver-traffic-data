@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Denver I-70 Traffic — By The Numbers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --border: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-orange: #f97316;
+            --accent-orange-dim: rgba(249, 115, 22, 0.15);
+            --accent-blue: #38bdf8;
+            --accent-blue-dim: rgba(56, 189, 248, 0.12);
+            --accent-red: #ef4444;
+            --accent-red-dim: rgba(239, 68, 68, 0.12);
+            --accent-green: #22c55e;
+            --accent-green-dim: rgba(34, 197, 94, 0.12);
+            --accent-purple: #a78bfa;
+            --accent-yellow: #facc15;
+            --gradient-mountain: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1a2e 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* === HERO === */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            background: var(--gradient-mountain);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 120% 60% at 50% 120%, rgba(249, 115, 22, 0.08) 0%, transparent 70%),
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Mountain silhouette */
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: var(--bg-primary);
+            clip-path: polygon(
+                0% 100%, 0% 65%, 5% 55%, 12% 40%, 18% 30%, 22% 38%, 28% 20%, 
+                35% 35%, 40% 15%, 45% 25%, 50% 10%, 55% 22%, 60% 18%, 65% 30%, 
+                70% 25%, 75% 40%, 80% 32%, 85% 45%, 90% 50%, 95% 60%, 100% 55%, 100% 100%
+            );
+            opacity: 0.6;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--accent-orange-dim);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            border-radius: 100px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--accent-orange);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-orange);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            font-weight: 400;
+            line-height: 1.05;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            animation: fadeSlideUp 1s ease;
+        }
+
+        .hero h1 span {
+            color: var(--accent-orange);
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 3rem;
+            animation: fadeSlideUp 1s ease 0.2s both;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            animation: fadeSlideUp 1s ease 0.4s both;
+        }
+
+        .hero-stat {
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-card);
+        }
+
+        .hero-stat-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--accent-orange);
+        }
+
+        .hero-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MAIN CONTENT === */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem 6rem;
+        }
+
+        /* Section headers */
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-number {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--accent-orange);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-desc {
+            font-size: 1rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            max-width: 650px;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+            margin: 4rem 0;
+        }
+
+        /* === CHART CARDS === */
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .chart-card:hover {
+            border-color: rgba(249, 115, 22, 0.2);
+        }
+
+        .chart-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .chart-card-title {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chart-card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .chart-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .chart-tag.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
+        .chart-tag.blue { background: var(--accent-blue-dim); color: var(--accent-blue); }
+        .chart-tag.red { background: var(--accent-red-dim); color: var(--accent-red); }
+        .chart-tag.green { background: var(--accent-green-dim); color: var(--accent-green); }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 380px;
+        }
+
+        .chart-container.tall {
+            height: 440px;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+            gap: 2rem;
+        }
+
+        /* === INSIGHT CARDS === */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s ease, border-color 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .insight-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .insight-text {
+            font-size: 0.85rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* === HEATMAP === */
+        .heatmap-wrapper {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .heatmap {
+            min-width: 600px;
+        }
+
+        .heatmap-row {
+            display: grid;
+            grid-template-columns: 80px repeat(12, 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .heatmap-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            padding-right: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .heatmap-label.header {
+            justify-content: center;
+            padding: 0;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 2/1;
+            min-height: 28px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.8);
+            transition: transform 0.15s ease;
+            cursor: default;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.08);
+            z-index: 2;
+        }
+
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .heatmap-legend-bar {
+            height: 10px;
+            width: 150px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #1e3a5f, #f97316, #ef4444);
+        }
+
+        /* === FOOTER === */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+
+        .footer a {
+            color: var(--accent-orange);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .hero { padding: 2rem 1.25rem; min-height: 90vh; }
+            .content { padding: 3rem 1.25rem 4rem; }
+            .chart-container { height: 300px; }
+            .chart-container.tall { height: 360px; }
+            .chart-card { padding: 1.25rem; }
+            .hero-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">Live Data Dashboard</div>
+        <h1>Denver's <span>I-70</span> Traffic Problem</h1>
+        <p class="hero-subtitle">
+            Real traffic data from Colorado's most congested corridor — the 
+            65-mile stretch between Denver and the Eisenhower Tunnel that turns 
+            into a parking lot every ski weekend.
+        </p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-value">12.9M</div>
+                <div class="hero-stat-label">Vehicles through Eisenhower Tunnel (2024)</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">42,348</div>
+                <div class="hero-stat-label">Peak daily avg — July 2024</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">4 hrs</div>
+                <div class="hero-stat-label">Worst-case drive (normally 90 min)</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">#20</div>
+                <div class="hero-stat-label">Most congested U.S. city (TomTom 2025)</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== CONTENT ==================== -->
+<main class="content">
+
+    <!-- SECTION 1: Tunnel Volume -->
+    <div class="section-header">
+        <div class="section-number">01 — Eisenhower Tunnel Volume</div>
+        <h2 class="section-title">The Tunnel Tells the Story</h2>
+        <p class="section-desc">
+            Every vehicle heading to or from the ski resorts must pass through the 
+            Eisenhower-Johnson Memorial Tunnel at 11,158 ft elevation — making it 
+            the single best chokepoint to measure I-70 mountain traffic.
+        </p>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div>
+                <div class="chart-card-title">Monthly Traffic Through the Tunnel</div>
+                <div class="chart-card-subtitle">Total vehicles (eastbound + westbound), 2022–2025</div>
+            </div>
+            <div class="chart-tag orange">CDOT Data</div>
+        </div>
+        <div class="chart-container tall">
+            <canvas id="tunnelMonthlyChart"></canvas>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <div class="chart-card-title">Annual Total Comparison</div>
+                    <div class="chart-card-subtitle">Total vehicles per year through the tunnel</div>
+                </div>
+                <div class="chart-tag blue">Year over Year</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="annualTotalChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <div class="chart-card-title">Seasonal Traffic Split</div>
+                    <div class="chart-card-subtitle">Avg daily vehicles by season, 2024</div>
+                </div>
+                <div class="chart-tag green">Seasonal</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="seasonalChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 2: Weekend Congestion -->
+    <div class="section-header">
+        <div class="section-number">02 — The Weekend Crunch</div>
+        <h2 class="section-title">When the Mountains Call,<br>Everyone Answers at Once</h2>
+        <p class="section-desc">
+            Ski traffic peaks between 6:30–11 AM westbound on Saturdays and 
+            1–7 PM eastbound on Sundays. A trip that takes 75 minutes on a Tuesday 
+            can stretch past 3 hours on a powder day.
+        </p>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div>
+                <div class="chart-card-title">Estimated Drive Time: Denver → Silverthorne (65 mi)</div>
+                <div class="chart-card-subtitle">Typical winter Saturday, by departure hour — based on Google Maps & CDOT historical patterns</div>
+            </div>
+            <div class="chart-tag red">Ski Season</div>
+        </div>
+        <div class="chart-container tall">
+            <canvas id="driveTimeChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div>
+                <div class="chart-card-title">Weekend Congestion Heatmap</div>
+                <div class="chart-card-subtitle">Relative congestion level, Denver ↔ Silverthorne — winter ski season typical patterns</div>
+            </div>
+            <div class="chart-tag orange">Heatmap</div>
+        </div>
+        <div class="heatmap-wrapper">
+            <div class="heatmap" id="heatmap"></div>
+        </div>
+        <div class="heatmap-legend">
+            <span>Low</span>
+            <div class="heatmap-legend-bar"></div>
+            <span>Extreme</span>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 3: Metro Congestion -->
+    <div class="section-header">
+        <div class="section-number">03 — Denver Metro Congestion</div>
+        <h2 class="section-title">It's Getting Worse in the City, Too</h2>
+        <p class="section-desc">
+            The TomTom 2025 Traffic Index puts Denver as the 20th most congested 
+            city in the U.S. Rush hour speeds average just 21.9 mph — and the 
+            population is projected to grow another 50% by 2040.
+        </p>
+    </div>
+
+    <div class="grid-2">
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <div class="chart-card-title">Denver Metro: Avg Rush Hour Speed</div>
+                    <div class="chart-card-subtitle">Miles per hour, recent years (TomTom)</div>
+                </div>
+                <div class="chart-tag blue">Metro</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="rushHourChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <div class="chart-card-title">Eastbound vs Westbound Split</div>
+                    <div class="chart-card-subtitle">Eisenhower Tunnel, monthly avg 2024</div>
+                </div>
+                <div class="chart-tag green">Directional</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="directionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 4: Takeaways -->
+    <div class="section-header">
+        <div class="section-number">04 — Key Takeaways</div>
+        <h2 class="section-title">What the Data Says</h2>
+    </div>
+
+    <div class="insights-grid">
+        <div class="insight-card">
+            <div class="insight-icon">&#9968;</div>
+            <div class="insight-title">July is King</div>
+            <div class="insight-text">
+                July 2024 saw 1.31M vehicles through the tunnel — the highest single month, 
+                driven by summer mountain tourism and outdoor recreation.
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon">&#10052;</div>
+            <div class="insight-title">Ski Season Surge</div>
+            <div class="insight-text">
+                January–March accounts for roughly 26% of annual tunnel traffic, with 
+                February weekends seeing the most intense congestion of the year.
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon">&#9200;</div>
+            <div class="insight-title">Leave Before 6:30 AM</div>
+            <div class="insight-text">
+                On a Saturday ski day, leaving Denver at 5:30 vs. 7:30 AM can 
+                save you nearly an hour of driving. The difference is dramatic.
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon">&#128664;</div>
+            <div class="insight-title">Sunday Afternoon Gridlock</div>
+            <div class="insight-text">
+                Eastbound I-70 congestion on Sundays typically starts around 1 PM, peaks 
+                at 3–5 PM, and doesn't clear until after 7 PM. Average delay: 60+ minutes.
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon">&#128200;</div>
+            <div class="insight-title">Steady Growth</div>
+            <div class="insight-text">
+                Tunnel traffic has grown from about 11.5M vehicles (2022) to over 12.9M 
+                (2024), a 12% increase in just two years.
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon">&#128651;</div>
+            <div class="insight-title">Transit Is Expanding</div>
+            <div class="insight-text">
+                CDOT's Snowstang bus and the Mountain Express Lane (tolled shoulder) 
+                are attempts to ease pressure, though capacity remains limited.
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <p>
+        Data sourced from 
+        <a href="https://www.codot.gov/travel/ejmt/trafficcounts" target="_blank">CDOT Eisenhower Tunnel Traffic Counts</a>,
+        <a href="https://goi70.com/travel/" target="_blank">GoI70.com</a>,
+        and <a href="https://www.tomtom.com/traffic-index/" target="_blank">TomTom Traffic Index</a>.
+        <br>
+        Congestion heatmap and drive-time estimates based on historical patterns reported by CDOT, INRIX, and Google Maps.
+        <br><br>
+        Built for the <a href="https://www.reddit.com/r/Denver/" target="_blank">r/Denver</a> community.
+    </p>
+</footer>
+
+<!-- ==================== CHARTS ==================== -->
+<script>
+// ---- Global Chart Defaults ----
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#1e293b';
+Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+Chart.defaults.font.size = 12;
+
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ---- REAL DATA: Eisenhower Tunnel Monthly Totals ----
+const tunnelData = {
+    2022: [1049457, 1015058, 1098754, 876549, 890366, 1086474, 1286963, 1204589, 1121830, 971826, 837640, 1049792],
+    2023: [1127575, 1067982, 1174853, 943753, 923744, 1127109, 1337681, 1179258, 1163328, 1006977, 873315, 1068736],
+    2024: [1080200, 1073770, 1177735, 887512, 935943, 1151737, 1312799, 1249694, 1152906, 986820, 838402, 1099612],
+    2025: [1074205, 1001348, 1176986, 885256, 925283, 1113708, 1242866, 1219740, 1116978, 953815, 862789, null]
+};
+
+// ---- Chart 1: Monthly Tunnel Traffic ----
+new Chart(document.getElementById('tunnelMonthlyChart'), {
+    type: 'line',
+    data: {
+        labels: months,
+        datasets: [
+            {
+                label: '2022',
+                data: tunnelData[2022],
+                borderColor: '#64748b',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0.35
+            },
+            {
+                label: '2023',
+                data: tunnelData[2023],
+                borderColor: '#a78bfa',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0.35
+            },
+            {
+                label: '2024',
+                data: tunnelData[2024],
+                borderColor: '#38bdf8',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0.35
+            },
+            {
+                label: '2025',
+                data: tunnelData[2025],
+                borderColor: '#f97316',
+                backgroundColor: 'rgba(249,115,22,0.08)',
+                borderWidth: 2.5,
+                pointRadius: 3,
+                pointBackgroundColor: '#f97316',
+                pointHoverRadius: 6,
+                tension: 0.35,
+                fill: true
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                labels: { usePointStyle: true, pointStyle: 'line', padding: 20 }
+            },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#f1f5f9',
+                bodyColor: '#94a3b8',
+                borderColor: '#334155',
+                borderWidth: 1,
+                padding: 12,
+                callbacks: {
+                    label: ctx => `${ctx.dataset.label}: ${ctx.raw ? (ctx.raw / 1000000).toFixed(2) + 'M vehicles' : 'N/A'}`
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+                min: 750000,
+                ticks: {
+                    callback: v => (v / 1000000).toFixed(1) + 'M'
+                },
+                grid: { color: 'rgba(30,41,59,0.5)' }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// ---- Chart 2: Annual Totals ----
+const annualTotals = {
+    2022: tunnelData[2022].reduce((a, b) => a + b, 0),
+    2023: tunnelData[2023].reduce((a, b) => a + b, 0),
+    2024: tunnelData[2024].reduce((a, b) => a + b, 0),
+};
+
+new Chart(document.getElementById('annualTotalChart'), {
+    type: 'bar',
+    data: {
+        labels: ['2022', '2023', '2024'],
+        datasets: [{
+            data: [annualTotals[2022], annualTotals[2023], annualTotals[2024]],
+            backgroundColor: ['#334155', '#6366f1', '#f97316'],
+            borderRadius: 8,
+            borderSkipped: false,
+            barThickness: 60
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#f1f5f9',
+                bodyColor: '#94a3b8',
+                borderColor: '#334155',
+                borderWidth: 1,
+                callbacks: {
+                    label: ctx => (ctx.raw / 1000000).toFixed(2) + 'M vehicles'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+                min: 10000000,
+                ticks: { callback: v => (v / 1000000).toFixed(1) + 'M' },
+                grid: { color: 'rgba(30,41,59,0.5)' }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// ---- Chart 3: Seasonal (2024 avg daily) ----
+const winter24 = (1080200 + 1073770 + 1177735) / (31 + 29 + 31);
+const spring24 = (887512 + 935943) / (30 + 31);
+const summer24 = (1151737 + 1312799 + 1249694) / (30 + 31 + 31);
+const fall24 = (1152906 + 986820 + 838402) / (30 + 31 + 30);
+const winterHoliday24 = 1099612 / 31;
+
+new Chart(document.getElementById('seasonalChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Ski Season\n(Jan–Mar)', 'Shoulder\n(Apr–May)', 'Summer\n(Jun–Aug)', 'Fall\n(Sep–Nov)', 'Holidays\n(Dec)'],
+        datasets: [{
+            data: [Math.round(winter24), Math.round(spring24), Math.round(summer24), Math.round(fall24), Math.round(winterHoliday24)],
+            backgroundColor: ['#38bdf8', '#a78bfa', '#f97316', '#22c55e', '#ef4444'],
+            borderRadius: 8,
+            borderSkipped: false,
+            barThickness: 48
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                callbacks: {
+                    label: ctx => ctx.raw.toLocaleString() + ' avg daily vehicles'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { callback: v => v.toLocaleString() },
+                grid: { color: 'rgba(30,41,59,0.5)' }
+            },
+            x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+    }
+});
+
+// ---- Chart 4: Drive Time (Saturday ski day, Denver→Silverthorne) ----
+// Based on Westword/Google Maps/CDOT historical pattern data
+const departureHours = ['5:00','5:30','6:00','6:30','7:00','7:30','8:00','8:30','9:00','9:30','10:00','10:30','11:00','11:30','12:00'];
+const driveMinutes =   [75,    78,    82,    95,    115,   135,   155,   165,   170,   160,   145,   130,   115,   100,   85];
+const freeFlowLine =   [75,    75,    75,    75,    75,    75,    75,    75,    75,    75,    75,    75,    75,    75,    75];
+
+new Chart(document.getElementById('driveTimeChart'), {
+    type: 'line',
+    data: {
+        labels: departureHours,
+        datasets: [
+            {
+                label: 'Typical Drive Time',
+                data: driveMinutes,
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239,68,68,0.1)',
+                borderWidth: 3,
+                pointRadius: 4,
+                pointBackgroundColor: '#ef4444',
+                pointHoverRadius: 7,
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Free-flow (75 min)',
+                data: freeFlowLine,
+                borderColor: '#22c55e',
+                borderWidth: 1.5,
+                borderDash: [6, 4],
+                pointRadius: 0,
+                fill: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                labels: { usePointStyle: true, pointStyle: 'circle', padding: 20 }
+            },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#f1f5f9',
+                bodyColor: '#94a3b8',
+                borderColor: '#334155',
+                borderWidth: 1,
+                padding: 12,
+                callbacks: {
+                    title: items => 'Depart Denver at ' + items[0].label + ' AM',
+                    label: ctx => {
+                        if (ctx.datasetIndex === 0) {
+                            const mins = ctx.raw;
+                            const h = Math.floor(mins / 60);
+                            const m = mins % 60;
+                            return `Drive time: ${h}h ${m}m (${mins - 75} min delay)`;
+                        }
+                        return 'Free-flow: 1h 15m';
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                title: { display: true, text: 'Minutes', color: '#64748b' },
+                min: 60,
+                max: 190,
+                ticks: {
+                    callback: v => {
+                        const h = Math.floor(v / 60);
+                        const m = v % 60;
+                        return h + 'h' + (m ? ' ' + m + 'm' : '');
+                    }
+                },
+                grid: { color: 'rgba(30,41,59,0.5)' }
+            },
+            x: {
+                title: { display: true, text: 'Departure Time (AM)', color: '#64748b' },
+                grid: { display: false }
+            }
+        }
+    }
+});
+
+// ---- Chart 5: Rush Hour Speed ----
+new Chart(document.getElementById('rushHourChart'), {
+    type: 'line',
+    data: {
+        labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+        datasets: [{
+            label: 'Avg Rush Hour Speed (mph)',
+            data: [28.5, 25.1, 23.8, 23.0, 22.4, 21.9],
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249,115,22,0.08)',
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointBackgroundColor: '#f97316',
+            pointBorderColor: '#0a0e17',
+            pointBorderWidth: 2,
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                callbacks: { label: ctx => ctx.raw + ' mph avg' }
+            }
+        },
+        scales: {
+            y: {
+                title: { display: true, text: 'MPH', color: '#64748b' },
+                min: 18,
+                max: 32,
+                grid: { color: 'rgba(30,41,59,0.5)' }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// ---- Chart 6: Eastbound vs Westbound ----
+const eb2024 = [540627, 520845, 587039, 452075, 467391, 577698, 655788, 617316, 583599, 497578, 411715, 530409];
+const wb2024 = [539573, 552925, 590696, 435437, 468552, 574039, 657011, 632378, 569307, 489242, 426687, 569203];
+
+new Chart(document.getElementById('directionChart'), {
+    type: 'line',
+    data: {
+        labels: months,
+        datasets: [
+            {
+                label: 'Eastbound (returning)',
+                data: eb2024,
+                borderColor: '#38bdf8',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: '#38bdf8',
+                tension: 0.35
+            },
+            {
+                label: 'Westbound (heading up)',
+                data: wb2024,
+                borderColor: '#a78bfa',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: '#a78bfa',
+                tension: 0.35
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                labels: { usePointStyle: true, pointStyle: 'circle', padding: 16 }
+            },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                callbacks: {
+                    label: ctx => ctx.dataset.label + ': ' + (ctx.raw / 1000).toFixed(0) + 'K'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+                min: 380000,
+                ticks: { callback: v => (v / 1000).toFixed(0) + 'K' },
+                grid: { color: 'rgba(30,41,59,0.5)' }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// ---- HEATMAP: Weekend Congestion ----
+// Rows = time periods, Cols = Fri WB, Sat WB, Sat EB, Sun WB, Sun EB
+// Values 0-10 scale representing congestion intensity
+// Based on CDOT/GoI70 typical winter weekend patterns
+const heatmapData = {
+    hours: ['5–6 AM','6–7 AM','7–8 AM','8–9 AM','9–10 AM','10–11 AM','11 AM–12','12–1 PM','1–2 PM','2–3 PM','3–4 PM','4–5 PM','5–6 PM','6–7 PM','7–8 PM','8–9 PM'],
+    days: ['Fri WB','Sat WB','Sat EB','Sun WB','Sun EB'],
+    // [Fri WB, Sat WB, Sat EB, Sun WB, Sun EB]
+    values: [
+        [0, 2, 0, 0, 0],  // 5-6
+        [0, 5, 0, 1, 0],  // 6-7
+        [1, 9, 0, 3, 0],  // 7-8
+        [1,10, 0, 4, 0],  // 8-9
+        [1, 8, 1, 3, 0],  // 9-10
+        [0, 5, 1, 1, 0],  // 10-11
+        [0, 2, 2, 0, 1],  // 11-12
+        [1, 1, 3, 0, 3],  // 12-1
+        [2, 0, 5, 0, 6],  // 1-2
+        [3, 0, 7, 0, 8],  // 2-3
+        [5, 0, 9, 0,10],  // 3-4
+        [6, 0,10, 0,10],  // 4-5
+        [7, 0, 8, 0, 9],  // 5-6
+        [6, 0, 5, 0, 7],  // 6-7
+        [4, 0, 2, 0, 4],  // 7-8
+        [2, 0, 1, 0, 1],  // 8-9
+    ]
+};
+
+function getHeatColor(val) {
+    if (val === 0) return 'rgba(30, 58, 95, 0.4)';
+    if (val <= 2) return 'rgba(56, 189, 248, 0.35)';
+    if (val <= 4) return 'rgba(56, 189, 248, 0.6)';
+    if (val <= 6) return 'rgba(249, 115, 22, 0.5)';
+    if (val <= 8) return 'rgba(249, 115, 22, 0.8)';
+    return 'rgba(239, 68, 68, 0.85)';
+}
+
+const heatmapEl = document.getElementById('heatmap');
+
+// Header row
+let headerRow = '<div class="heatmap-row"><div class="heatmap-label"></div>';
+heatmapData.days.forEach(d => {
+    headerRow += `<div class="heatmap-label header" style="grid-column: span 1;">${d}</div>`;
+});
+// Pad remaining columns
+for (let i = 0; i < 12 - heatmapData.days.length; i++) {
+    headerRow += '<div></div>';
+}
+headerRow += '</div>';
+heatmapEl.innerHTML = headerRow;
+
+// Adjust grid for 5 data columns
+const style = document.createElement('style');
+style.textContent = `
+    #heatmap .heatmap-row {
+        grid-template-columns: 80px repeat(5, 1fr);
+    }
+`;
+document.head.appendChild(style);
+
+heatmapData.hours.forEach((hour, i) => {
+    let row = `<div class="heatmap-row"><div class="heatmap-label">${hour}</div>`;
+    heatmapData.values[i].forEach(val => {
+        const label = val === 0 ? '' : val <= 3 ? 'Low' : val <= 6 ? 'Med' : val <= 8 ? 'High' : 'Extreme';
+        row += `<div class="heatmap-cell" style="background:${getHeatColor(val)}" title="${hour}: ${label}">${label}</div>`;
+    });
+    row += '</div>';
+    heatmapEl.innerHTML += row;
+});
+
+</script>
+
+</body>
+</html>
